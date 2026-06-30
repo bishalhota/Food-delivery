@@ -4,6 +4,7 @@ import TryCatch from '../middlewares/trycatch.js';
 import { AuthenticatedRequest } from '../middlewares/isAuth.js';
 import { oauth2Client } from '../config/googleConfig.js';
 import axios from 'axios';
+import type { Response } from 'express';
 
 export const loginUser = TryCatch(async (req, res) => {
     const {code} = req.body;
@@ -78,3 +79,36 @@ export const myProfile = TryCatch(async(req:AuthenticatedRequest, res) =>{
     const user = req.user;
     res.json(user);
 })
+
+
+
+export const reverseLocation = async (req:AuthenticatedRequest, res:Response) => {
+    const lat = req.query.lat;
+    const lon = req.query.lon;
+
+    if (!lat || !lon) {
+        return res.status(400).json({ message: "lat and lon are required" });
+    }
+
+    try {
+        const response = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`,
+            {
+                headers: {
+                    "User-Agent": "FoodDeliveryApp/1.0",
+                    "Accept-Language": "en",
+                    "From": "your-email@example.com",
+                },
+                timeout: 10000,
+            }
+        );
+
+        return res.json(response.data);
+    } catch (error: any) {
+        console.error("Location lookup failed:", error.message);
+        return res.status(502).json({
+            message: "Location service unavailable",
+            error: error.message,
+        });
+    }
+};

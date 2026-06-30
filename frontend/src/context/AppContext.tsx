@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useState ,type ReactNode} from 'react';
 import axios from 'axios';
 import { authService } from '../main';
-import type { AppContextType, User } from '../Types';
+import type { AppContextType, LocationData, User } from '../Types';
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
@@ -14,7 +14,7 @@ export const AppProvider = ({children}: AppProviderProps) =>{
     const [isAuth, setIsAuth] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const [location, setLocation] = useState(null);
+    const [location, setLocation] = useState<LocationData | null>(null);
     const [loadingLocation, setLoadingLocation] = useState(false);
     const [city, setCity] = useState("fetching location...");
 
@@ -27,7 +27,7 @@ export const AppProvider = ({children}: AppProviderProps) =>{
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setUser(data.data.user);
+            setUser(data.data);
             setIsAuth(true);
         } catch (error) {
             console.log(error);
@@ -40,7 +40,48 @@ export const AppProvider = ({children}: AppProviderProps) =>{
         fetchUser();
     },[]);
 
-    return (<AppContext.Provider value={{isAuth,loading,setIsAuth,setLoading,setUser,user}}>{children}</AppContext.Provider>
+    useEffect(()=>{
+        if(!navigator.geolocation){
+            return alert("Please allow location to access your location");
+        }
+        setLoadingLocation(true);
+
+        
+
+        navigator.geolocation.getCurrentPosition(async(position)=>{
+            
+            
+            const {latitude,longitude} = position.coords;
+
+            try{
+                const response = await axios.get(`${authService}/api/auth/location/reverse`,{
+                    params:{
+                        lat: latitude,
+                        lon: longitude,
+                    },
+                });
+                const data = await response.data;
+                setLocation({
+                    latitude,
+                    longitude,
+                    formattedAddress:data.display_name || "current Location"
+                })
+
+                setCity(data.address.city || data.address.town || data.address.village|| "Your Location")
+            }catch(error){
+                setLoadingLocation(false);
+                setLocation({
+                    latitude,
+                    longitude,
+                    formattedAddress:"Current Location",
+                });
+
+                setCity("Failed to load")
+            }
+        })  
+    },[])
+
+    return (<AppContext.Provider value={{isAuth,loading,setIsAuth,setLoading,setUser,user,location,loadingLocation,city}}>{children}</AppContext.Provider>
     );
 };
 
