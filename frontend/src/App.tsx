@@ -7,8 +7,16 @@ import ProtectedRoute from "./component/ProtecteRoute";
 import PublicRoute from "./component/publicRoute";
 import Navbar from "./component/navbar";
 import Account from "./pages/Account";
+import { useAppData } from "./context/AppContext";
+import Restaurant from "./pages/Restaurant";
 
 function App() {
+  const {user} = useAppData()
+
+  if(user && user.role === "seller"){
+    return <Restaurant />
+  }
+
   return (
     <BrowserRouter>
     <Navbar />

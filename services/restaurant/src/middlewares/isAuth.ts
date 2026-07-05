@@ -9,6 +9,7 @@ export interface IUser  {
     // password: string;
     image: string;
     role: string;
+    restaurantId: string;
 }
 
 

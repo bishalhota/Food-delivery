@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import Restaurant from "../models/Restaurant.js";
 import getBuffer  from "../config/datauri.js";
 import axios from "axios";
+import jwt from "jsonwebtoken";
 
 export const addRestaurant = TryCatch(async(req:AuthenticatedRequest,res:Response)=>{
     const user = req.user;
@@ -73,5 +74,48 @@ export const addRestaurant = TryCatch(async(req:AuthenticatedRequest,res:Respons
     });
 
 });
+
+export const fetchMyRestaurant = TryCatch(async(req:AuthenticatedRequest,res:Response)=>{
+    if(!req.user){
+        return res.status(401).json({
+            message:"Please login to access this route",
+        });
+    }
+
+
+    const restaurant = await Restaurant.findOne({
+        ownerId:req.user._id,
+    })
+
+    if(!restaurant){
+        return res.status(404).json({
+            message:"Invalid User",
+        });
+    }
+
+    // restaurant id will be required during websockets
+    if(!req.user.restaurantId){
+        const token = jwt.sign({
+            user:{
+                ...req.user,
+                restaurantId: restaurant._id,
+            },
+        },process.env.JWT_SECRET as string,
+        {
+            expiresIn:"15d",
+        }
+    );
+
+        return res.json({
+            restaurant,token
+        })
+
+    }
+
+    res.json({
+        restaurant,
+    });
+});
+
 
 
