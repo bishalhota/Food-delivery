@@ -6,6 +6,7 @@ import {Toaster} from "react-hot-toast";
 import ProtectedRoute from "./component/ProtecteRoute";
 import PublicRoute from "./component/publicRoute";
 import Navbar from "./component/navbar";
+import Account from "./pages/Account";
 
 function App() {
   return (
@@ -15,9 +16,11 @@ function App() {
         <Route element = {<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/select-role" element={<SelectRole />} />
+          <Route path="/account" element={<Account />} />
         </Route>
         <Route element = {<PublicRoute />}>
           <Route path="/login" element={<Login />} />
+
         </Route>
       </Routes>
       <Toaster />

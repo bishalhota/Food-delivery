@@ -7,7 +7,7 @@ export interface User{
         role: string;
 }
 
-export interface Location{
+export interface LocationData{
     latitude: number;
     longitude:number;
     formattedAddress: string;
@@ -20,6 +20,10 @@ export interface AppContextType{
     setUser: React.Dispatch<React.SetStateAction<User | null>>;
     setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    location: LocationData | null;
+    loadingLocation: boolean;
+    city: string;
+
 }
 
 
