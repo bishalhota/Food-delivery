@@ -37,7 +37,7 @@ export interface IRestaurant {
   autoLocation: {
     type: "Point";
     coordinates: [number, number]; //[longitude,latitude]
-    formatedAddress: string;
+    formattedAddress: string;
   };
   isOpen: boolean;
   createdAt: Date;
